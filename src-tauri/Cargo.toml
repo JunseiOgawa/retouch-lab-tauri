@@ -18,10 +18,16 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["protocol-asset"] }
 tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 image = "0.25"
+# Optional ONNX Runtime for local model inference (disabled by default). Enable with `--features onnx`.
+onnxruntime = { version = "0.0.14", optional = true }
+
+[features]
+default = []
+onnx = ["onnxruntime"]
 

@@ -1,3 +1,4 @@
+mod onnx_inference;
 mod retouch;
 
 #[tauri::command]

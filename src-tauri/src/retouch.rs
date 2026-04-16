@@ -265,6 +265,26 @@ fn run_strategy(
     params: &HashMap<String, f32>,
 ) -> Result<Option<String>, String> {
     let mut rgb = image.to_rgb8();
+
+        if strategy_id == "ai-onnx-model" {
+            let strength = get_param(params, "onnxStrength");
+            let model_path = std::env::current_exe()
+                .ok()
+                .and_then(|p| p.parent().map(|d| d.join("models").join("model.onnx")))
+                .and_then(|p| p.to_str().map(|s| s.to_string()));
+            let model_path = model_path.ok_or_else(|| "Unable to determine model path".to_string())?;
+            #[cfg(feature = "onnx")]
+            {
+                let info = crate::onnx_inference::run_model(&mut rgb, &model_path, strength)
+                    .map_err(|e| format!("ONNX inference error: {}", e))?;
+                *image = DynamicImage::ImageRgb8(rgb);
+                return Ok(Some(info));
+            }
+            #[cfg(not(feature = "onnx"))]
+            {
+                return Err("ONNX feature not enabled at compile time".to_string());
+            }
+        }
     let model_info = match strategy_id {
         "classic-auto-balance" => {
             let wb_strength = get_param(params, "whiteBalanceStrength");
