@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+# 変更内容が壊れていないかをコミット前に確認する。
+npm run build
+if [ $? -ne 0 ]; then
+  echo "build failed. commit aborted."
+  exit 1
+fi
+
+# 公開前提のため、高優先度脆弱性があればコミットを止める。
+npm run security:check
+if [ $? -ne 0 ]; then
+  echo "security check failed. commit aborted."
+  exit 1
+fi
