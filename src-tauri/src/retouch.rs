@@ -52,12 +52,39 @@ pub struct ApplyRetouchResponse {
 pub fn list_strategies() -> Vec<RetouchStrategyDefinition> {
     vec![
         RetouchStrategyDefinition {
-            id: "classic-auto-balance".to_string(),
-            label: "Auto Balance".to_string(),
-            description: "Gray-worldホワイトバランスと軽いコントラスト補正。".to_string(),
-            tab: "classic".to_string(),
+            id: "saturation-single-pass".to_string(),
+            label: "Saturation Auto Adjust (Formula + Model)".to_string(),
+            description: "数式補正とK-Meansモデル推定を合成して彩度を1回で自動調整。".to_string(),
+            tab: "saturation".to_string(),
             family: "classic".to_string(),
             parameters: vec![
+                param(
+                    "saturationDelta",
+                    "Saturation Delta",
+                    "彩度補正量",
+                    -0.5,
+                    0.8,
+                    0.01,
+                    0.22,
+                ),
+                param(
+                    "formulaStrength",
+                    "Formula Strength",
+                    "数式補正の寄与率",
+                    0.0,
+                    1.0,
+                    0.01,
+                    0.74,
+                ),
+                param(
+                    "modelStrength",
+                    "Model Strength",
+                    "K-Meansモデル推定の寄与率",
+                    0.0,
+                    1.0,
+                    0.01,
+                    0.62,
+                ),
                 param(
                     "whiteBalanceStrength",
                     "WB Strength",
@@ -79,149 +106,49 @@ pub fn list_strategies() -> Vec<RetouchStrategyDefinition> {
             ],
         },
         RetouchStrategyDefinition {
-            id: "classic-vibrance-boost".to_string(),
-            label: "Vibrance Boost".to_string(),
-            description: "彩度と微コントラストを同時に持ち上げる。".to_string(),
-            tab: "classic".to_string(),
-            family: "classic".to_string(),
+            id: "reauto-double-pass-v2".to_string(),
+            label: "Re Auto Adjust v2 (Formula + Model)".to_string(),
+            description: "数式補正 + K-Means推定を使い、再度の自動調整を重ねる2パスversion。".to_string(),
+            tab: "reauto".to_string(),
+            family: "hybrid".to_string(),
             parameters: vec![
                 param(
-                    "vibrance",
-                    "Vibrance",
-                    "彩度ブースト量",
+                    "firstPassStrength",
+                    "First Pass Strength",
+                    "1回目補正の反映率",
                     0.0,
-                    0.8,
+                    1.0,
                     0.01,
-                    0.26,
+                    0.70,
                 ),
                 param(
-                    "contrastBoost",
-                    "Contrast Boost",
-                    "局所の見えを整える軽いコントラスト調整",
+                    "secondPassStrength",
+                    "Second Pass Strength",
+                    "2回目の再自動調整の反映率",
                     0.0,
-                    0.5,
+                    1.0,
+                    0.01,
+                    0.42,
+                ),
+                param(
+                    "saturationBias",
+                    "Saturation Bias",
+                    "再調整全体へ加える彩度バイアス",
+                    -0.4,
+                    0.6,
                     0.01,
                     0.10,
                 ),
-            ],
-        },
-        RetouchStrategyDefinition {
-            id: "classic-highlight-recovery".to_string(),
-            label: "Highlight Recovery".to_string(),
-            description: "ハイライトを圧縮して白飛びを抑える。".to_string(),
-            tab: "classic".to_string(),
-            family: "classic".to_string(),
-            parameters: vec![
                 param(
-                    "highlightThreshold",
-                    "Highlight Threshold",
-                    "圧縮を開始する明るさ閾値",
-                    120.0,
-                    250.0,
-                    1.0,
-                    198.0,
-                ),
-                param(
-                    "recoveryStrength",
-                    "Recovery Strength",
-                    "ハイライト圧縮の強さ",
+                    "modelStrength",
+                    "Model Strength",
+                    "各パスでのK-Meansモデル推定の寄与率",
                     0.0,
                     1.0,
                     0.01,
-                    0.56,
+                    0.58,
                 ),
             ],
-        },
-        RetouchStrategyDefinition {
-            id: "classic-gamma-lift".to_string(),
-            label: "Gamma Lift".to_string(),
-            description: "中間調を中心にトーンバランスを調整。".to_string(),
-            tab: "classic".to_string(),
-            family: "classic".to_string(),
-            parameters: vec![param(
-                "gamma",
-                "Gamma",
-                "ガンマ値（1.0より大きいほど持ち上げ）",
-                0.6,
-                1.8,
-                0.01,
-                1.20,
-            )],
-        },
-        RetouchStrategyDefinition {
-            id: "classic-local-clarity".to_string(),
-            label: "Local Clarity".to_string(),
-            description: "アンシャープマスクで局所的な明瞭感を強化。".to_string(),
-            tab: "classic".to_string(),
-            family: "classic".to_string(),
-            parameters: vec![
-                param(
-                    "clarityAmount",
-                    "Clarity Amount",
-                    "明瞭感強調量",
-                    0.0,
-                    2.0,
-                    0.01,
-                    0.95,
-                ),
-                param(
-                    "blurSigma",
-                    "Blur Sigma",
-                    "明瞭化に使うぼかし半径",
-                    0.4,
-                    4.0,
-                    0.01,
-                    1.60,
-                ),
-            ],
-        },
-        RetouchStrategyDefinition {
-            id: "ai-kmeans-scene-model".to_string(),
-            label: "AI Scene Model (K-Means)".to_string(),
-            description: "色分布クラスタリングからシーン特性を推定して補正。".to_string(),
-            tab: "ai".to_string(),
-            family: "ai".to_string(),
-            parameters: vec![param(
-                "sceneStrength",
-                "Scene Strength",
-                "シーン推定補正の反映率",
-                0.0,
-                1.0,
-                0.01,
-                0.74,
-            )],
-        },
-        RetouchStrategyDefinition {
-            id: "hybrid-skin-aware-tone".to_string(),
-            label: "Hybrid Skin-Aware Tone".to_string(),
-            description: "肌色検知を使ってトーン調整を局所適用。".to_string(),
-            tab: "ai".to_string(),
-            family: "hybrid".to_string(),
-            parameters: vec![param(
-                "skinToneStrength",
-                "Skin Tone Strength",
-                "肌領域への補正強度",
-                0.0,
-                1.0,
-                0.01,
-                0.62,
-            )],
-        },
-        RetouchStrategyDefinition {
-            id: "hybrid-subject-pop".to_string(),
-            label: "Hybrid Subject Pop".to_string(),
-            description: "被写体らしい領域を推定し、彩度/コントラストを重点補正。".to_string(),
-            tab: "ai".to_string(),
-            family: "hybrid".to_string(),
-            parameters: vec![param(
-                "subjectPopStrength",
-                "Subject Pop Strength",
-                "推定被写体への強調量",
-                0.0,
-                1.0,
-                0.01,
-                0.70,
-            )],
         },
     ]
 }
@@ -286,6 +213,66 @@ fn run_strategy(
             }
         }
     let model_info = match strategy_id {
+        "saturation-single-pass" => {
+            let saturation_delta = get_param(params, "saturationDelta");
+            let formula_strength = get_param(params, "formulaStrength");
+            let model_strength = get_param(params, "modelStrength");
+            let wb_strength = get_param(params, "whiteBalanceStrength");
+            let contrast_boost = get_param(params, "contrastBoost");
+            let (model_delta, model_detail) = infer_saturation_model_delta(&rgb, model_strength);
+            let formula_delta = saturation_delta * formula_strength.clamp(0.0, 1.0);
+            let final_delta = (formula_delta + model_delta).clamp(-0.7, 0.9);
+
+            apply_auto_saturation_pass(&mut rgb, final_delta, wb_strength, contrast_boost);
+            Some(format!(
+                "mode=formula+model;formula_delta={:.3};model_delta={:.3};final_delta={:.3};{}",
+                formula_delta, model_delta, final_delta, model_detail
+            ))
+        }
+        "reauto-double-pass-v2" => {
+            let first_pass_strength = get_param(params, "firstPassStrength");
+            let second_pass_strength = get_param(params, "secondPassStrength");
+            let saturation_bias = get_param(params, "saturationBias");
+            let model_strength = get_param(params, "modelStrength");
+            let (model_delta_pass1, pass1_model_detail) =
+                infer_saturation_model_delta(&rgb, model_strength * first_pass_strength);
+
+            let pass1_delta = (
+                (0.20 * first_pass_strength + saturation_bias * first_pass_strength)
+                    + model_delta_pass1
+            )
+                .clamp(-0.7, 0.9);
+
+            apply_auto_saturation_pass(
+                &mut rgb,
+                pass1_delta,
+                0.76 * first_pass_strength,
+                0.18 * first_pass_strength,
+            );
+
+            let (model_delta_pass2, pass2_model_detail) =
+                infer_saturation_model_delta(&rgb, 0.85 * model_strength * second_pass_strength);
+            let pass2_delta = (
+                (0.12 * second_pass_strength + 0.55 * saturation_bias * second_pass_strength)
+                    + model_delta_pass2
+            )
+                .clamp(-0.7, 0.9);
+
+            apply_auto_saturation_pass(
+                &mut rgb,
+                pass2_delta,
+                0.55 * second_pass_strength,
+                0.12 * second_pass_strength,
+            );
+
+            if pass2_delta > 0.45 {
+                apply_highlight_recovery(&mut rgb, 210.0, 0.30 * second_pass_strength);
+            }
+            Some(format!(
+                "mode=formula+model;pass1_delta={:.3};pass2_delta={:.3};pass1={};pass2={}",
+                pass1_delta, pass2_delta, pass1_model_detail, pass2_model_detail
+            ))
+        }
         "classic-auto-balance" => {
             let wb_strength = get_param(params, "whiteBalanceStrength");
             let contrast_boost = get_param(params, "contrastBoost");
@@ -337,6 +324,83 @@ fn run_strategy(
 
     *image = DynamicImage::ImageRgb8(rgb);
     Ok(model_info)
+}
+
+fn apply_auto_saturation_pass(
+    image: &mut RgbImage,
+    saturation_delta: f32,
+    white_balance_strength: f32,
+    contrast_boost: f32,
+) {
+    apply_saturation_delta(image, saturation_delta);
+    apply_gray_world_white_balance(image, white_balance_strength);
+    apply_contrast(image, contrast_boost);
+}
+
+/// K-Meansの色分布推定を使って、彩度補正のモデル由来デルタを算出する。
+fn infer_saturation_model_delta(image: &RgbImage, strength: f32) -> (f32, String) {
+    let effective_strength = strength.clamp(0.0, 1.0);
+    if effective_strength <= 0.0 {
+        return (0.0, "sat_model=disabled".to_string());
+    }
+
+    let sample_step = 12_usize;
+    let mut samples = Vec::<Vec3>::new();
+    let mut saturation_sum = 0.0_f32;
+    let mut lightness_sum = 0.0_f32;
+    let mut sample_count = 0_u32;
+
+    for y in (0..image.height() as usize).step_by(sample_step) {
+        for x in (0..image.width() as usize).step_by(sample_step) {
+            let pixel = image.get_pixel(x as u32, y as u32);
+            let (_, s, l) = rgb_to_hsl(pixel[0], pixel[1], pixel[2]);
+            saturation_sum += s;
+            lightness_sum += l;
+            sample_count += 1;
+            samples.push(Vec3::new(pixel[0] as f32, pixel[1] as f32, pixel[2] as f32));
+        }
+    }
+
+    if sample_count == 0 {
+        return (0.0, "sat_model=empty_sample".to_string());
+    }
+
+    let avg_saturation = saturation_sum / sample_count as f32;
+    let avg_lightness = lightness_sum / sample_count as f32;
+    let clusters = kmeans_palette(&samples, 3, 6);
+
+    let dominant_saturation = clusters
+        .iter()
+        .max_by_key(|item| item.count)
+        .map(|dominant| {
+            let (_, s, _) = rgb_to_hsl(
+                clamp_channel(dominant.center.r),
+                clamp_channel(dominant.center.g),
+                clamp_channel(dominant.center.b),
+            );
+            s
+        })
+        .unwrap_or(avg_saturation);
+
+    let target_saturation = if avg_lightness < 0.35 {
+        0.50
+    } else if avg_lightness > 0.78 {
+        0.40
+    } else {
+        0.46
+    };
+
+    let raw_model_delta =
+        ((target_saturation - avg_saturation) * 0.90) + ((dominant_saturation - avg_saturation) * 0.35);
+    let model_delta = raw_model_delta.clamp(-0.35, 0.45) * effective_strength;
+
+    (
+        model_delta,
+        format!(
+            "sat_model=kmeans;avg_sat={:.3};dominant_sat={:.3};target_sat={:.3};model_strength={:.2}",
+            avg_saturation, dominant_saturation, target_saturation, effective_strength
+        ),
+    )
 }
 
 /// Gray-world前提でチャンネル毎のゲインを合わせる。

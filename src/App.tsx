@@ -3,8 +3,8 @@ import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import "./App.css";
 
-// UIタブは Classic と AI/Hybrid の2系統で固定する。
-type StrategyTab = "classic" | "ai";
+// UIタブは「今回の彩度調整」と「再度の自動調整」の2系統で固定する。
+type StrategyTab = "saturation" | "reauto";
 
 // スライダー描画用のパラメータ定義。
 interface StrategyParameterDefinition {
@@ -36,12 +36,12 @@ interface ApplyRetouchResponse {
 }
 
 const TAB_LABEL: Record<StrategyTab, string> = {
-  classic: "Classic / Math",
-  ai: "AI / Hybrid",
+  saturation: "今回の彩度調整",
+  reauto: "再度の自動調整",
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState<StrategyTab>("classic");
+  const [activeTab, setActiveTab] = useState<StrategyTab>("saturation");
   const [strategies, setStrategies] = useState<RetouchStrategyDefinition[]>([]);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string | null>(null);
   const [paramValues, setParamValues] = useState<Record<string, number>>({});
@@ -172,7 +172,7 @@ function App() {
       <header className="page-header">
         <h1>Retouch Lab (Tauri)</h1>
         <p className="subtitle">
-          開発者向け自動レタッチ検証アプリ: タブ + プルダウンで手法を切り替えて比較します。
+          開発者向け自動レタッチ検証アプリ: 今回の彩度調整と再度の自動調整をタブで比較します。
         </p>
       </header>
 
@@ -194,7 +194,7 @@ function App() {
         </div>
 
         <div className="tab-row" role="tablist" aria-label="strategy tabs">
-          {(["classic", "ai"] as StrategyTab[]).map((tab) => (
+          {(["saturation", "reauto"] as StrategyTab[]).map((tab) => (
             <button
               key={tab}
               type="button"
